@@ -8,26 +8,21 @@ sequenceDiagram
 
     User->>UI: Выдать книгу (bookId, readerId)
     UI->>App: issueBook(bookId, readerId, dueDate)
-    activate App
     
     App->>DB: bookRepo.findById(bookId)
     DB-->>App: Данные книги
     
     App->>Biz: Проверка isAvailable()
-    activate Biz
     
     alt Книга доступна
         Biz-->>App: Да
-        deactivate Biz
         App->>DB: updateAvailableCopies(bookId, -1)
         App->>DB: loanRepo.create(bookId, readerId, dueDate)
         App-->>UI: Успех
         UI-->>User: Сообщение "Книга выдана"
     else Нет экземпляров
         Biz-->>App: Нет
-        deactivate Biz
         App-->>UI: Ошибка
         UI-->>User: "Нет доступных экземпляров"
     end
-    deactivate App
 ```
