@@ -1,155 +1,81 @@
 classDiagram
-    direction TB
-
-    class RoomCategory {
-        <<enumeration>>
-        STANDARD
-        FAMILY
-        SUPERIOR
-        SUITE
+    class Book {
+        +int id
+        +string title
+        +int authorId
+        +int year
+        +string genre
+        +string isbn
+        +int totalCopies
+        +int availableCopies
+        +isAvailable() bool
     }
-
-    class BookingStatus {
-        <<enumeration>>
-        CONFIRMED
-        CANCELLED
-    }
-
-    class Hotel {
+    
+    class Author {
         +int id
         +string name
-        +string address
-        +List~Room~ rooms
-        +getRooms() List~Room~
     }
-
-    class Room {
-        +int id
-        +string roomNumber
-        +RoomCategory category
-        +int bedsCount
-        +float pricePerNight
-        +string description
-        +string status
-        +getPricePerNight() float
-    }
-
-    class Customer {
+    
+    class Reader {
         +int id
         +string fullName
-        +string email
+        +string ticketNumber
         +string phone
+        +string email
     }
-
-    class Booking {
+    
+    class BookLoan {
         +int id
-        +Customer customer
-        +Room room
-        +string checkInDate
-        +string checkOutDate
-        +float totalPrice
-        +BookingStatus status
-        +cancel() void
+        +int bookId
+        +int readerId
+        +string issueDate
+        +string dueDate
+        +bool isReturned
     }
 
-    class RoomRepository {
-        +getAllRooms() List~Room~
-        +getRoomById(int id) Room
+    class BookRepository {
+        +add(Book) void
+        +findById(int id) Book
+        +search(string query) array
+        +updateAvailableCopies(int bookId, int change) void
+        +getAll() array
+    }
+    
+    class ReaderRepository {
+        +add(Reader) void
+        +getAll() array
+    }
+    
+    class LoanRepository {
+        +create(int bookId, int readerId, string dueDate) void
+        +close(int loanId) int
+        +getByReader(int readerId) array
+        +getHistory() array
+        +getOverdue() array
     }
 
-    class BookingRepository {
-        +getBookingsByRoom(int roomId) List~Booking~
-        +saveBooking(Booking booking) bool
-        +cancelBooking(int bookingId) bool
-        +getBookingsByCustomer(int customerId) List~Booking~
+    class LibraryService {
+        -BookRepository bookRepo
+        -ReaderRepository readerRepo
+        -LoanRepository loanRepo
+        +addBook(Book) void
+        +registerReader(Reader) void
+        +searchBooks(string query) array
+        +issueBook(int bookId, int readerId, string dueDate) void
+        +returnBook(int loanId) void
+        +getReaderBooks(int readerId) array
+        +getHistory() array
+        +getOverdue() array
     }
 
-    class CatalogViewModel {
-        +List~Room~ rooms
-        +string selectedCategory
-        +loadCatalog() void
-        +filterByCategory(string category) void
-    }
-
-    class RoomSearchViewModel {
-        -RoomRepository roomRepo
-        -BookingRepository bookingRepo
-        +string checkInDate
-        +string checkOutDate
-        +int guestsCount
-        +List~Room~ availableRooms
-        +string errorMessage
-        +searchRooms() void
-        -isRoomFree(int roomId, string inDate, string outDate) bool
-    }
-
-    class RoomDetailsViewModel {
-        -RoomRepository roomRepo
-        +Room room
-        +string checkInDate
-        +string checkOutDate
-        +int nightsCount
-        +float totalPrice
-        +loadRoom(int roomId) void
-        +calculatePrice() void
-    }
-
-    class BookingViewModel {
-        -BookingRepository bookingRepo
-        +Room room
-        +string customerName
-        +string customerPhone
-        +string customerEmail
-        +string checkInDate
-        +string checkOutDate
-        +float totalPrice
-        +List~Booking~ myBookings
-        +createBooking() bool
-        +cancelBooking(int bookingId) void
-        +loadMyBookings(int customerId) void
-    }
-
-    class CatalogView {
-        <<View>>
-        +displayCatalog() void
-    }
-
-    class RoomSearchView {
-        <<View>>
-        +displayResults() void
-        +showError(string msg) void
-    }
-
-    class RoomDetailsView {
-        <<View>>
-        +displayDetails() void
-        +displayPrice() void
-    }
-
-    class BookingView {
-        <<View>>
-        +showConfirmation() void
-        +showMyBookings() void
-    }
-
-    Hotel "1" *-- "many" Room : содержит
-    Booking --> Room : относится к
-    Booking --> Customer : оформлен на
-    Booking --> BookingStatus : имеет статус
-    Room --> RoomCategory : имеет категорию
-
-    CatalogViewModel ..> RoomRepository : использует
-    RoomSearchViewModel ..> RoomRepository : использует
-    RoomSearchViewModel ..> BookingRepository : использует
-    RoomDetailsViewModel ..> RoomRepository : использует
-    BookingViewModel ..> BookingRepository : использует
-
-    CatalogViewModel ..> Room : возвращает
-    RoomSearchViewModel ..> Room : возвращает
-    RoomDetailsViewModel ..> Room : возвращает
-    BookingViewModel ..> Booking : возвращает
-
-    CatalogView ..> CatalogViewModel : Binding
-    RoomSearchView ..> RoomSearchViewModel : Binding
-    RoomDetailsView ..> RoomDetailsViewModel : Binding
-    BookingView ..> BookingViewModel : Binding
+    Book --> Author
+    BookLoan --> Book
+    BookLoan --> Reader
+    
+    LibraryService --> BookRepository
+    LibraryService --> ReaderRepository
+    LibraryService --> LoanRepository
+    
+    LibraryService ..> Book
+    LibraryService ..> Reader
+    LibraryService ..> BookLoan
