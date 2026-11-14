@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
     class Book {
         +int id
@@ -79,3 +80,5 @@ classDiagram
     LibraryService ..> Book
     LibraryService ..> Reader
     LibraryService ..> BookLoan
+
+```
